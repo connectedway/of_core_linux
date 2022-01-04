@@ -51,12 +51,14 @@ OFC_HANDLE ofc_event_create_impl(OFC_EVENT_TYPE eventType) {
   return (hLinuxEvent) ;
 }
 
-OFC_VOID ofc_event_set_impl(OFC_HANDLE hEvent) {
+OFC_VOID ofc_event_set_impl(OFC_HANDLE hEvent)
+{
   LINUX_EVENT *linuxEvent ;
   OFC_HANDLE hWaitSet ;
 
   linuxEvent = ofc_handle_lock(hEvent) ;
-  if (linuxEvent != OFC_NULL) {
+  if (linuxEvent != OFC_NULL)
+    {
       pthread_mutex_lock (&linuxEvent->pthread_mutex) ;
 
       linuxEvent->signalled = OFC_TRUE ;
@@ -64,19 +66,21 @@ OFC_VOID ofc_event_set_impl(OFC_HANDLE hEvent) {
       
       hWaitSet = ofc_handle_get_wait_set (hEvent) ;
       if (hWaitSet != OFC_HANDLE_NULL) {
-	  ofc_waitset_signal_impl (hWaitSet, hEvent) ;
-	}
+	ofc_waitset_signal_impl (hWaitSet, hEvent) ;
+      }
       pthread_mutex_unlock (&linuxEvent->pthread_mutex) ;
 
       ofc_handle_unlock(hEvent) ;
     }
 }
 
-OFC_VOID ofc_event_reset_impl(OFC_HANDLE hEvent) {
+OFC_VOID ofc_event_reset_impl(OFC_HANDLE hEvent)
+{
   LINUX_EVENT *linuxEvent ;
 
   linuxEvent = ofc_handle_lock(hEvent) ;
-  if (linuxEvent != OFC_NULL) {
+  if (linuxEvent != OFC_NULL)
+    {
       pthread_mutex_lock (&linuxEvent->pthread_mutex) ;
       linuxEvent->signalled = OFC_FALSE ;
       pthread_mutex_unlock (&linuxEvent->pthread_mutex) ;
@@ -84,21 +88,21 @@ OFC_VOID ofc_event_reset_impl(OFC_HANDLE hEvent) {
     }
 }
 
-OFC_EVENT_TYPE ofc_event_get_type_impl(OFC_HANDLE hEvent) {
+OFC_EVENT_TYPE ofc_event_get_type_impl(OFC_HANDLE hEvent) 
 {
-  LINUX_EVENT *linux_event ;
-  OFC_EVENT_TYPE eventType ;
+    LINUX_EVENT *linux_event ;
+    OFC_EVENT_TYPE eventType ;
 
-  eventType = OFC_EVENT_AUTO ;
-  linux_event = ofc_handle_lock(hEvent) ;
-  if (linux_event != OFC_NULL) {
+    eventType = OFC_EVENT_AUTO ;
+    linux_event = ofc_handle_lock(hEvent) ;
+    if (linux_event != OFC_NULL) {
       eventType = linux_event->eventType ;
       ofc_handle_unlock(hEvent) ;
     }
-  return (eventType) ;
+    return (eventType) ;
 }
 
-OFC_VOID ofc_event_destroy_impl(OFC_HANDLE hEvent) {
+OFC_VOID ofc_event_destroy_impl(OFC_HANDLE hEvent) 
 {
   LINUX_EVENT *linuxEvent ;
 
@@ -114,12 +118,13 @@ OFC_VOID ofc_event_destroy_impl(OFC_HANDLE hEvent) {
     }
 }
 
-OFC_VOID ofc_event_wait_impl(OFC_HANDLE hEvent) {
+OFC_VOID ofc_event_wait_impl(OFC_HANDLE hEvent) 
 {
   LINUX_EVENT *linux_event ;
 
   linux_event = ofc_handle_lock(hEvent) ;
-  if (linux_event != OFC_NULL) {
+  if (linux_event != OFC_NULL)
+    {
       pthread_mutex_lock (&linux_event->pthread_mutex) ;
       if (!linux_event->signalled)
 	pthread_cond_wait (&linux_event->pthread_cond,
@@ -132,13 +137,15 @@ OFC_VOID ofc_event_wait_impl(OFC_HANDLE hEvent) {
     }
 }
 
-OFC_BOOL ofc_event_test_impl(OFC_HANDLE hEvent) {
+OFC_BOOL ofc_event_test_impl(OFC_HANDLE hEvent)
+{
   LINUX_EVENT *linux_event ;
-  BLUE_BOOL ret ;
+  OFC_BOOL ret ;
 
   ret = OFC_TRUE ;
   linux_event = ofc_handle_lock(hEvent) ;
-  if (linux_event != OFC_NULL) {
+  if (linux_event != OFC_NULL)
+    {
       pthread_mutex_lock (&linux_event->pthread_mutex) ;
       ret = linux_event->signalled ;
       pthread_mutex_unlock (&linux_event->pthread_mutex) ;

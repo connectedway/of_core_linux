@@ -51,7 +51,8 @@ typedef struct
 } OFC_SOCKET_IMPL ;
 
 OFC_HANDLE ofc_socket_impl_create(OFC_FAMILY_TYPE family,
-                                  OFC_SOCKET_TYPE socktype) {
+                                  OFC_SOCKET_TYPE socktype)
+{
   OFC_HANDLE hSocket ;
   OFC_SOCKET_IMPL *sock ;
 
@@ -123,7 +124,8 @@ OFC_HANDLE ofc_socket_impl_create(OFC_FAMILY_TYPE family,
   return (hSocket) ;
 }
 
-OFC_VOID ofc_socket_impl_destroy(OFC_HANDLE hSocket) {
+OFC_VOID ofc_socket_impl_destroy(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *sock ;
 
   sock = ofc_handle_lock(hSocket) ;
@@ -149,7 +151,8 @@ OFC_VOID ofc_socket_impl_destroy(OFC_HANDLE hSocket) {
 static OFC_VOID make_sockaddr(struct sockaddr **mysockaddr,
                               socklen_t *mysocklen,
                               const OFC_IPADDR *ip,
-                              OFC_UINT16 port) {
+                              OFC_UINT16 port)
+{
   struct sockaddr_in *mysockaddr_in ;
   struct sockaddr_in6 *mysockaddr_in6 ;
   OFC_INT i ;
@@ -185,7 +188,8 @@ static OFC_VOID make_sockaddr(struct sockaddr **mysockaddr,
 
 OFC_VOID unmake_sockaddr(struct sockaddr *mysockaddr,
                          OFC_IPADDR *ip,
-                         OFC_UINT16 *port) {
+                         OFC_UINT16 *port)
+{
   struct sockaddr_in *mysockaddr_in ;
   struct sockaddr_in6 *mysockaddr_in6 ;
   OFC_INT i ;
@@ -213,13 +217,14 @@ OFC_VOID unmake_sockaddr(struct sockaddr *mysockaddr,
 }
 
 OFC_BOOL ofc_socket_impl_bind(OFC_HANDLE hSocket, const OFC_IPADDR *ip,
-                              OFC_UINT16 port) {
+                              OFC_UINT16 port)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
 
   int status ;
   struct sockaddr *mysockaddr;
-  socklen_t mysocklen,
+  socklen_t mysocklen;
 
   ret = OFC_FALSE ;
 
@@ -249,7 +254,8 @@ OFC_BOOL ofc_socket_impl_bind(OFC_HANDLE hSocket, const OFC_IPADDR *ip,
  * Returns:
  *    status (STATE_SUCCESS or STATE_FAIL)
  */
-OFC_BOOL ofc_socket_impl_close(OFC_HANDLE hSocket) {
+OFC_BOOL ofc_socket_impl_close(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
 
@@ -277,7 +283,7 @@ OFC_BOOL ofc_socket_impl_close(OFC_HANDLE hSocket) {
  *    status (STATE_SUCCESS or STATE_FAIL)
  */
 OFC_BOOL ofc_socket_impl_connect(OFC_HANDLE hSocket,
-                                 const OFC_IPADDR *ip, OFC_UINT16 port) {
+                                 const OFC_IPADDR *ip, OFC_UINT16 port)
 {
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
@@ -315,7 +321,8 @@ OFC_BOOL ofc_socket_impl_connect(OFC_HANDLE hSocket,
  * Returns:
  *    status (STATE_SUCCESS or STATE_FAIL)
  */
-OFC_BOOL ofc_socket_impl_listen(OFC_HANDLE hSocket, OFC_INT backlog) {
+OFC_BOOL ofc_socket_impl_listen(OFC_HANDLE hSocket, OFC_INT backlog)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
   int status ;
@@ -343,7 +350,8 @@ OFC_BOOL ofc_socket_impl_listen(OFC_HANDLE hSocket, OFC_INT backlog) {
  *    status (STATE_SUCCESS or STATE_FAIL)
  */
 OFC_HANDLE ofc_socket_impl_accept(OFC_HANDLE hSocket,
-                                  OFC_IPADDR *ip, OFC_UINT16 *port) {
+                                  OFC_IPADDR *ip, OFC_UINT16 *port)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_SOCKET_IMPL *newsock ;
   OFC_HANDLE hNewSock ;
@@ -383,7 +391,8 @@ OFC_HANDLE ofc_socket_impl_accept(OFC_HANDLE hSocket,
  *    hSock - Socket to set the port reuseable on
  *    onoff - TRUE for on, FALSE for off
  */
-OFC_BOOL ofc_socket_impl_reuse_addr(OFC_HANDLE hSocket, OFC_BOOL onoff) {
+OFC_BOOL ofc_socket_impl_reuse_addr(OFC_HANDLE hSocket, OFC_BOOL onoff)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
 
@@ -413,7 +422,8 @@ OFC_BOOL ofc_socket_impl_reuse_addr(OFC_HANDLE hSocket, OFC_BOOL onoff) {
  * Returns:
  *   True if connected, false otherwise
  */
-OFC_BOOL ofc_socket_impl_connected(OFC_HANDLE hSocket) {
+OFC_BOOL ofc_socket_impl_connected(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
   socklen_t namelen ;
@@ -448,7 +458,8 @@ OFC_BOOL ofc_socket_impl_connected(OFC_HANDLE hSocket) {
  * Returns:
  *    status - Success of failure
  */
-OFC_BOOL ofc_socket_impl_no_block(OFC_HANDLE hSocket, OFC_BOOL onoff) {
+OFC_BOOL ofc_socket_impl_no_block(OFC_HANDLE hSocket, OFC_BOOL onoff)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
 
@@ -481,7 +492,8 @@ OFC_BOOL ofc_socket_impl_no_block(OFC_HANDLE hSocket, OFC_BOOL onoff) {
  *    Number of bytes written
  */
 OFC_SIZET ofc_socket_impl_send(OFC_HANDLE hSocket, const OFC_VOID *buf,
-                               OFC_SIZET len) {
+                               OFC_SIZET len)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_SIZET ret ;
 
@@ -517,7 +529,8 @@ OFC_SIZET ofc_socket_impl_send(OFC_HANDLE hSocket, const OFC_VOID *buf,
 OFC_SIZET ofc_socket_impl_sendto(OFC_HANDLE hSocket, const OFC_VOID *buf,
                                  OFC_SIZET len,
                                  const OFC_IPADDR *ip,
-                                 OFC_UINT16 port) {
+                                 OFC_UINT16 port)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_SIZET ret ;
 
@@ -558,7 +571,8 @@ OFC_SIZET ofc_socket_impl_sendto(OFC_HANDLE hSocket, const OFC_VOID *buf,
  */
 OFC_SIZET ofc_socket_impl_recv(OFC_HANDLE hSocket,
                                OFC_VOID *buf,
-                               OFC_SIZET len) {
+                               OFC_SIZET len)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_SIZET ret ;
 
@@ -602,7 +616,8 @@ OFC_SIZET ofc_socket_impl_recv_from(OFC_HANDLE hSocket,
                                     OFC_VOID *buf,
                                     OFC_SIZET len,
                                     OFC_IPADDR *ip,
-                                    OFC_UINT16 *port) {
+                                    OFC_UINT16 *port)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_SIZET ret ;
 
@@ -637,7 +652,8 @@ OFC_SIZET ofc_socket_impl_recv_from(OFC_HANDLE hSocket,
 }
 
 OFC_VOID ofc_socket_impl_set_event(OFC_HANDLE hSocket,
-                                   OFC_UINT16 revents) {
+                                   OFC_UINT16 revents)
+{
   OFC_SOCKET_IMPL *pSocket ;
 
   pSocket = ofc_handle_lock(hSocket) ;
@@ -648,7 +664,8 @@ OFC_VOID ofc_socket_impl_set_event(OFC_HANDLE hSocket,
     }
 }
 
-OFC_UINT16 ofc_socket_impl_get_event(OFC_HANDLE hSocket) {
+OFC_UINT16 ofc_socket_impl_get_event(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *pSocket ;
   OFC_UINT16 ret ;
 
@@ -662,7 +679,8 @@ OFC_UINT16 ofc_socket_impl_get_event(OFC_HANDLE hSocket) {
   return (ret) ;
 }
 
-int ofc_socket_impl_get_fd(OFC_HANDLE hSocket) {
+int ofc_socket_impl_get_fd(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *pSocket ;
   int fd ;
 
@@ -677,7 +695,8 @@ int ofc_socket_impl_get_fd(OFC_HANDLE hSocket) {
   return (fd) ;
 }
 
-OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket) {
+OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket)
+{
   OFC_SOCKET_IMPL *pSocket ;
   OFC_SOCKET_EVENT_TYPE EventTest ;
 
@@ -706,7 +725,8 @@ OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket) {
 }
 
 OFC_BOOL ofc_socket_impl_enable(OFC_HANDLE hSocket,
-                                OFC_SOCKET_EVENT_TYPE type) {
+                                OFC_SOCKET_EVENT_TYPE type)
+{
   OFC_SOCKET_IMPL *pSocket ;
   OFC_INT EventTest ;
   OFC_BOOL ret ;
@@ -738,7 +758,8 @@ OFC_BOOL ofc_socket_impl_enable(OFC_HANDLE hSocket,
   return (ret) ;
 }
 
-OFC_VOID ofc_socket_impl_set_send_size(OFC_HANDLE hSocket, OFC_INT size) {
+OFC_VOID ofc_socket_impl_set_send_size(OFC_HANDLE hSocket, OFC_INT size)
+{
   OFC_SOCKET_IMPL *sock ;
 
   sock = ofc_handle_lock(hSocket) ;
@@ -750,7 +771,8 @@ OFC_VOID ofc_socket_impl_set_send_size(OFC_HANDLE hSocket, OFC_INT size) {
     }
 }
   
-OFC_VOID ofc_socket_impl_set_recv_size(OFC_HANDLE hSocket, OFC_INT size) {
+OFC_VOID ofc_socket_impl_set_recv_size(OFC_HANDLE hSocket, OFC_INT size)
+{
   OFC_SOCKET_IMPL *sock ;
 
   sock = ofc_handle_lock(hSocket) ;
@@ -764,7 +786,8 @@ OFC_VOID ofc_socket_impl_set_recv_size(OFC_HANDLE hSocket, OFC_INT size) {
   
 OFC_BOOL ofc_socket_impl_get_addresses(OFC_HANDLE hSock,
                                        OFC_SOCKADDR *local,
-                                       OFC_SOCKADDR *remote) {
+                                       OFC_SOCKADDR *remote)
+{
   OFC_SOCKET_IMPL *sock ;
   OFC_BOOL ret ;
   int linux_status ;
@@ -788,7 +811,7 @@ OFC_BOOL ofc_socket_impl_get_addresses(OFC_HANDLE hSock,
 	    local->sin_family = OFC_FAMILY_IP ;
 	  else
 	    local->sin_family = OFC_FAMILY_IPV6 ;
-	  unmake_sockaddr(lock_sockaddr, &local->sin_addr,
+	  unmake_sockaddr(local_sockaddr, &local->sin_addr,
 			  &local->sin_port);
 
 	  remote_sockaddr_size = (OFC_MAX (sizeof (struct sockaddr_in6),

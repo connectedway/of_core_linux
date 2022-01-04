@@ -59,7 +59,7 @@ OFC_VOID ofc_waitset_destroy_impl(WAIT_SET *pWaitSet)
   close (LinuxWaitSet->pipe_files[0]) ;
   close (LinuxWaitSet->pipe_files[1]) ;
   ofc_free(pWaitSet->impl) ;
-  pWaitSert->impl = OFC_NULL;
+  pWaitSet->impl = OFC_NULL;
 }
 
 typedef struct
@@ -119,7 +119,7 @@ OFC_HANDLE PollEvent (OFC_INT fd, OFC_HANDLE eventQueue)
 		{
 		  if (ofc_event_test(hEvent) == OFC_TRUE)
 		    {
-		      if (ofc_event_get_type(hEvent) == OFZC_EVENT_AUTO)
+		      if (ofc_event_get_type(hEvent) == OFC_EVENT_AUTO)
 			ofc_event_reset(hEvent) ;
 		      triggered_event = eventElement->hAssoc ;
 		    }
@@ -156,7 +156,7 @@ OFC_HANDLE ofc_waitset_wait_impl(OFC_HANDLE handle)
   int poll_count ;
   OFC_MSTIME wait_time ;
 #if defined(OFC_FS_LINUX)
-  OFC_FS_TYPE fsType ;
+  OFC_FST_TYPE fsType ;
 #endif
   OFC_HANDLE eventQueue ;
   EVENT_ELEMENT *eventElement ;
@@ -384,7 +384,8 @@ OFC_HANDLE ofc_waitset_wait_impl(OFC_HANDLE handle)
 }
 
 OFC_VOID ofc_waitset_set_assoc_impl(OFC_HANDLE hEvent,
-                                    OFC_HANDLE hApp, OFC_HANDLE hSet) {
+                                    OFC_HANDLE hApp, OFC_HANDLE hSet)
+{
   OFC_HANDLE hAssoc ;
 
   switch (ofc_handle_get_type(hEvent))
@@ -432,7 +433,7 @@ OFC_VOID ofc_waitset_set_assoc_impl(OFC_HANDLE hEvent,
 }
 
 OFC_VOID ofc_waitset_add_impl(OFC_HANDLE hSet, OFC_HANDLE hApp,
-                              OFC_HANDLE hEvent) {
+                              OFC_HANDLE hEvent)
 {
   OFC_HANDLE hAssoc ;
 

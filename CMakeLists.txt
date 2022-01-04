@@ -23,6 +23,7 @@ set(SRCS
         )
 
 add_library(of_core_linux STATIC ${SRCS})
+target_link_libraries(of_core_linux PUBLIC pthread of_core_static)
 
 set_target_properties(of_core_linux PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(of_core_linux PROPERTIES SOVERSION 1)

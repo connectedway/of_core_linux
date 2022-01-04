@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 #include "ofc/types.h"
 #include "ofc/handle.h"
@@ -47,7 +48,7 @@ OFC_VOID ofc_process_unblock_signal(OFC_INT signal) {
   sigemptyset (&new_set) ;
   sigaddset (&new_set, signal) ;
 
-  pthread_sigmask (SIG_UNBLOCK, &new_set, BLUE_NULL) ;
+  pthread_sigmask (SIG_UNBLOCK, &new_set, OFC_NULL) ;
 }
 
 OFC_VOID ofc_process_signal (OFC_PROCESS_ID process, OFC_INT signal,
@@ -125,7 +126,7 @@ OFC_HANDLE ofc_process_exec_impl (OFC_CTCHAR *name,
 	{
 	  int ret3 ;
 
-	  if (cuname != BLUE_NULL)
+	  if (cuname != OFC_NULL)
 	    {
 	      user = getpwnam(cuname) ;
 	      if (user != OFC_NULL)
@@ -164,7 +165,7 @@ OFC_HANDLE ofc_process_exec_impl (OFC_CTCHAR *name,
 	{
 	  OFC_DWORD_PTR pid2l = (OFC_DWORD_PTR) pid2 ;
 	  hProcess = 
-	    BlueHandleCreate (OFC_HANDLE_PROCESS, (OFC_VOID *) pid2l) ;
+	    ofc_handle_create (OFC_HANDLE_PROCESS, (OFC_VOID *) pid2l) ;
 	}
     }
 
@@ -210,5 +211,5 @@ OFC_VOID ofc_process_kill_impl(OFC_PROCESS_ID pid) {
 OFC_VOID
 ofc_process_crash_impl(OFC_CCHAR *obuf) {
   ofc_write_console_impl(obuf) ;
-  _Exit(EX_SOFTWARE);
+  _Exit(EXIT_SUCCESS);
 }  

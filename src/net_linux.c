@@ -196,8 +196,8 @@ OFC_VOID ofc_net_interface_addr_impl(OFC_INT index,
 		if (pbcast != OFC_NULL) {
 		  pbcast->ip_version = OFC_FAMILY_IPV6 ;
 		  pbcast->u.ipv6 = ofc_in6addr_bcast ;
+		  pbcast->u.ipv6.scope = scope;
 		}
-		pbcast->u.ipv6.scope = scope;
 	    }
 	}
       freeifaddrs(ifap) ;

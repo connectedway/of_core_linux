@@ -66,7 +66,7 @@ static OFC_UINT32 ofc_time_make_time(struct tm *tm) {
   return tim;
 }
 
-static OFC_VOID ofc_time_local_time(OFC_UINTZ32 time, struct tm *tm) {
+static OFC_VOID ofc_time_local_time(OFC_UINT32 time, struct tm *tm) {
   OFC_INT days_in_year ;
   OFC_INT ticks_in_day ;
   OFC_INT ticks_in_hour ;

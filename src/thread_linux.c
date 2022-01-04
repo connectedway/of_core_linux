@@ -52,7 +52,7 @@ static void *ofc_thread_launch(void *arg)
     {
       pthread_cancel (linuxThread->thread) ;
       ofc_handle_destroy(linuxThread->handle) ;
-      ofc_heap_free(linuxThread) ;
+      ofc_free(linuxThread) ;
     }
   return (OFC_NULL) ;
 }
@@ -63,7 +63,7 @@ OFC_HANDLE ofc_thread_create_impl(OFC_DWORD(scheduler)(OFC_HANDLE hThread,
                                   OFC_INT thread_instance,
                                   OFC_VOID *context,
                                   OFC_THREAD_DETACHSTATE detachstate,
-                                  OFC_HANDLE hNotify) {
+                                  OFC_HANDLE hNotify)
 {
   LINUX_THREAD *linuxThread ;
   OFC_HANDLE ret ;
@@ -79,7 +79,7 @@ OFC_HANDLE ofc_thread_create_impl(OFC_DWORD(scheduler)(OFC_HANDLE hThread,
       linuxThread->context = context ;
       linuxThread->hNotify = hNotify ;
       linuxThread->handle =
-	BlueHandleCreate (OFC_HANDLE_THREAD, linuxThread) ;
+	ofc_handle_create (OFC_HANDLE_THREAD, linuxThread) ;
       linuxThread->detachstate = detachstate ;
       pthread_attr_init (&attr) ;
 
@@ -89,10 +89,10 @@ OFC_HANDLE ofc_thread_create_impl(OFC_DWORD(scheduler)(OFC_HANDLE hThread,
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE) ;
 
       if (pthread_create (&linuxThread->thread, &attr,
-			  BlueThreadLaunch, linuxThread) != 0)
+			  ofc_thread_launch, linuxThread) != 0)
 	{
 	  ofc_handle_destroy(linuxThread->handle) ;
-	  ofc_heap_free(linuxThread) ;
+	  ofc_free(linuxThread) ;
 	}
       else
 	ret = linuxThread->handle ;
@@ -101,7 +101,7 @@ OFC_HANDLE ofc_thread_create_impl(OFC_DWORD(scheduler)(OFC_HANDLE hThread,
 }
 
 OFC_VOID
-ofc_thread_set_waitset_impl(OFC_HANDLE hThread, OFC_HANDLE wait_set) {
+ofc_thread_set_waitset_impl(OFC_HANDLE hThread, OFC_HANDLE wait_set)
 {
   LINUX_THREAD *linuxThread ;
 
@@ -113,7 +113,8 @@ ofc_thread_set_waitset_impl(OFC_HANDLE hThread, OFC_HANDLE wait_set) {
     }
 }
 
-OFC_VOID ofc_thread_delete_impl(OFC_HANDLE hThread) {
+OFC_VOID ofc_thread_delete_impl(OFC_HANDLE hThread)
+{
   LINUX_THREAD *linuxThread ;
 
   linuxThread = ofc_handle_lock(hThread) ;
@@ -126,7 +127,7 @@ OFC_VOID ofc_thread_delete_impl(OFC_HANDLE hThread) {
     }
 }
 
-OFC_VOID ofc_thread_wait_impl(OFC_HANDLE hThread) {
+OFC_VOID ofc_thread_wait_impl(OFC_HANDLE hThread)
 {
   LINUX_THREAD *linuxThread ;
   int ret ;
@@ -144,7 +145,8 @@ OFC_VOID ofc_thread_wait_impl(OFC_HANDLE hThread) {
     }
 }
 
-OFC_BOOL ofc_thread_is_deleting_impl(OFC_HANDLE hThread) {
+OFC_BOOL ofc_thread_is_deleting_impl(OFC_HANDLE hThread)
+{
   LINUX_THREAD *linuxThread ;
   OFC_BOOL ret ;
 
@@ -159,7 +161,8 @@ OFC_BOOL ofc_thread_is_deleting_impl(OFC_HANDLE hThread) {
   return (ret) ;
 }
 
-OFC_VOID ofc_sleep_impl(OFC_DWORD milliseconds) {
+OFC_VOID ofc_sleep_impl(OFC_DWORD milliseconds)
+{
   useconds_t useconds ;
 
   if (milliseconds == OFC_INFINITE)
@@ -176,45 +179,53 @@ OFC_VOID ofc_sleep_impl(OFC_DWORD milliseconds) {
   pthread_testcancel() ;
 }
 
-OFC_DWORD ofc_thread_create_variable_impl(OFC_VOID) {
+OFC_DWORD ofc_thread_create_variable_impl(OFC_VOID)
+{
   pthread_key_t key ;
 
   pthread_key_create (&key, NULL) ;
   return ((OFC_DWORD) key) ;
 }
 
-OFC_VOID ofc_thread_destroy_variable_impl(OFC_DWORD dkey) {
+OFC_VOID ofc_thread_destroy_variable_impl(OFC_DWORD dkey)
+{
   pthread_key_t key ;
   key = (pthread_key_t) dkey ;
 
   pthread_key_delete (key);
 }
 
-OFC_DWORD_PTR ofc_thread_get_variable_impl(OFC_DWORD var) {
+OFC_DWORD_PTR ofc_thread_get_variable_impl(OFC_DWORD var)
+{
   return ((OFC_DWORD_PTR) pthread_getspecific ((pthread_key_t) var)) ;
 }
 
-OFC_VOID ofc_thread_set_variable_impl(OFC_DWORD var, OFC_DWORD_PTR val) {
-  pthread_setspecific ((pthread_key_t) var, (BLUE_LPVOID) val) ;
+OFC_VOID ofc_thread_set_variable_impl(OFC_DWORD var, OFC_DWORD_PTR val)
+{
+  pthread_setspecific ((pthread_key_t) var, (OFC_LPVOID) val) ;
 }
 
 /*
  * These routines are noops on platforms that support TLS
  */
 OFC_CORE_LIB OFC_VOID
-ofc_thread_create_local_storage_impl(OFC_VOID) {
+ofc_thread_create_local_storage_impl(OFC_VOID)
+{
 }
 
 OFC_CORE_LIB OFC_VOID
-ofc_thread_destroy_local_storage_impl(OFC_VOID) {
+ofc_thread_destroy_local_storage_impl(OFC_VOID)
+{
 }
 
 OFC_CORE_LIB OFC_VOID
-ofc_thread_init_impl(OFC_VOID) {
+ofc_thread_init_impl(OFC_VOID)
+{
 }
 
 OFC_CORE_LIB OFC_VOID
-ofc_thred_destroy_impl(OFC_VOID) {
+ofc_thred_destroy_impl(OFC_VOID)
+{
 }
 
 /** \} */
