@@ -22,9 +22,6 @@ set(SRCS
         src/waitset_linux.c
         )
 
-add_library(of_core_linux STATIC ${SRCS})
-target_link_libraries(of_core_linux PUBLIC pthread of_core_static)
-
-set_target_properties(of_core_linux PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(of_core_linux PROPERTIES SOVERSION 1)
+add_library(of_core_linux OBJECT ${SRCS})
+set_property(TARGET of_core_linux PROPERTY POSITION_INDEPENDENT_CODE ON)
 
