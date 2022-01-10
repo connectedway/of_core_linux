@@ -23,5 +23,6 @@ set(SRCS
         )
 
 add_library(of_core_linux OBJECT ${SRCS})
+target_link_libraries(of_core_linux PRIVATE pthread)
 set_property(TARGET of_core_linux PROPERTY POSITION_INDEPENDENT_CODE ON)
 
