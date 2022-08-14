@@ -224,8 +224,21 @@ ofc_thread_init_impl(OFC_VOID)
 }
 
 OFC_CORE_LIB OFC_VOID
-ofc_thred_destroy_impl(OFC_VOID)
+ofc_thread_destroy_impl(OFC_VOID)
 {
 }
 
+OFC_CORE_LIB OFC_VOID
+ofc_thread_detach_impl(OFC_HANDLE hThread)
+{
+  LINUX_THREAD *linuxThread ;
+
+  linuxThread = ofc_handle_lock (hThread) ;
+  if (linuxThread != OFC_NULL)
+    {
+      linuxThread->detachstate = OFC_THREAD_DETACH;
+      pthread_detach(linuxThread->thread);
+      ofc_handle_unlock(hThread) ;
+    }
+}
 /** \} */
