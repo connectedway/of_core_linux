@@ -3,6 +3,7 @@
  * Attribution-NoDerivatives 4.0 International license that can be
  * found in the LICENSE file.
  */
+#define _GNU_SOURCE
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <time.h>
@@ -239,7 +240,7 @@ OFC_MSTIME ofc_get_runtime_impl(OFC_VOID) {
   OFC_MSTIME runtime ;
 
   runtime = 0 ;
-  ret = getrusage (RUSAGE_SELF, &r_usage) ;
+  ret = getrusage (RUSAGE_THREAD, &r_usage) ;
   if (ret == 0)
     runtime = (r_usage.ru_utime.tv_sec + r_usage.ru_stime.tv_sec) * 1000000 + 
       (r_usage.ru_utime.tv_usec + r_usage.ru_stime.tv_usec) ;
