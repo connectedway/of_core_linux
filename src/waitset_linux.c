@@ -44,7 +44,7 @@ OFC_VOID ofc_waitset_create_impl(WAIT_SET *pWaitSet)
 
   LinuxWaitSet = ofc_malloc (sizeof (LINUX_WAIT_SET)) ;
   pWaitSet->impl = LinuxWaitSet ;
-  pipe (LinuxWaitSet->pipe_files) ;
+  (void)!pipe (LinuxWaitSet->pipe_files) ;
   fcntl (LinuxWaitSet->pipe_files[0], F_SETFL,
 	 fcntl (LinuxWaitSet->pipe_files[0], F_GETFL) | O_NONBLOCK) ;
   fcntl (LinuxWaitSet->pipe_files[1], F_SETFL,
@@ -78,7 +78,8 @@ OFC_VOID ofc_waitset_signal_impl(OFC_HANDLE handle, OFC_HANDLE hEvent)
   if (pWaitSet != OFC_NULL)
     {
       LinuxWaitSet = pWaitSet->impl ;
-      write (LinuxWaitSet->pipe_files[1], &hEvent, sizeof (OFC_HANDLE)) ;
+      (void)!write (LinuxWaitSet->pipe_files[1], &hEvent,
+		    sizeof (OFC_HANDLE)) ;
       ofc_handle_unlock(handle) ;
     }
 }

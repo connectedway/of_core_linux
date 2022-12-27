@@ -133,8 +133,8 @@ OFC_HANDLE ofc_process_exec_impl (OFC_CTCHAR *name,
 	      user = getpwnam(cuname) ;
 	      if (user != OFC_NULL)
 		{
-		  setgid (user->pw_gid) ;
-		  setuid (user->pw_uid) ;
+		  (void)!setgid (user->pw_gid) ;
+		  (void)!setuid (user->pw_uid) ;
 		}
 	    }
 	  ret3 = execve (cname, exec_argv, environ) ;

@@ -35,19 +35,19 @@ static OFC_VOID open_log(OFC_VOID) {
 OFC_VOID ofc_write_stdout_impl(OFC_CCHAR *obuf, OFC_SIZET len) {
   if (g_fd == -1)
     open_log() ;
-  write (g_fd, obuf, len) ;
+  (void)!write (g_fd, obuf, len) ;
   fsync (g_fd) ;
 }
 
 OFC_VOID ofc_write_console_impl(OFC_CCHAR *obuf) {
   if (g_fd == -1)
     open_log() ;
-  write (g_fd, obuf, ofc_strlen(obuf)) ;
+  (void)!write (g_fd, obuf, ofc_strlen(obuf)) ;
   fsync (g_fd) ;
 }
 
 OFC_VOID ofc_read_stdin_impl(OFC_CHAR *inbuf, OFC_SIZET len) {
-  fgets (inbuf, len, stdin) ;
+  (void)!fgets (inbuf, len, stdin) ;
   if (ofc_strlen (inbuf) < len)
     len = ofc_strlen (inbuf) ;
   inbuf[len-1] = '\0' ;
