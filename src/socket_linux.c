@@ -105,9 +105,9 @@ OFC_HANDLE ofc_socket_impl_create(OFC_FAMILY_TYPE family,
 
       if (sock->socket < 0)
 	{
-            ofc_printf("socket error: %s, errno %d\n",
-                       fam == AF_INET ? "AF_INET" : "AF_INET6",
-                       errno);
+	  ofc_log(OFC_LOG_WARN, "socket error: %s, errno %d\n",
+		  fam == AF_INET ? "AF_INET" : "AF_INET6",
+		  errno);
 	  ofc_free (sock) ;
 	}
       else
