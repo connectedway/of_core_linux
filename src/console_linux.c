@@ -72,7 +72,7 @@ OFC_VOID ofc_write_log_impl(OFC_LOG_LEVEL level,
       break;
     }
 
-  syslog (priority, "%.*s", len, obuf);
+  syslog (priority, "%.*s", (int) len, obuf);
 }
 
 OFC_VOID ofc_write_console_impl(OFC_CCHAR *obuf) {
