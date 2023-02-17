@@ -252,7 +252,6 @@ OFC_VOID ofc_net_resolve_dns_name_impl(OFC_LPCSTR name,
 
   if (ret != 0)
     {
-      perror ("getaddrinfo") ;
       *num_addrs = 0 ;
     }
   else
