@@ -130,14 +130,13 @@ OFC_VOID ofc_thread_delete_impl(OFC_HANDLE hThread)
 OFC_VOID ofc_thread_wait_impl(OFC_HANDLE hThread)
 {
   LINUX_THREAD *linuxThread ;
-  int ret ;
 
   linuxThread = ofc_handle_lock(hThread) ;
   if (linuxThread != OFC_NULL)
     {
       if (linuxThread->detachstate == OFC_THREAD_JOIN)
 	{
-	  ret = pthread_join (linuxThread->thread, OFC_NULL) ;
+	  pthread_join (linuxThread->thread, OFC_NULL) ;
 	  ofc_handle_destroy(linuxThread->handle) ;
 	  ofc_free(linuxThread) ;
 	}

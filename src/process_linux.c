@@ -224,9 +224,7 @@ static int process_dump_libs_callback(struct dl_phdr_info *info,
 				      size_t size,
 				      void *data)
 {
-  ElfW(Addr) addr;
   const char *name;
-  OFC_SIZET len;
   name = info->dlpi_name;
   OFC_CHAR obuf[OBUF_SIZE];
   
@@ -253,14 +251,11 @@ static int process_dump_libs_callback(struct dl_phdr_info *info,
 OFC_VOID
 ofc_process_dump_libs_impl(OFC_VOID)
 {
-  OFC_CHAR obuf[OBUF_SIZE];
-
   dl_iterate_phdr(process_dump_libs_callback, OFC_NULL);
 }
 
 OFC_VOID *ofc_process_relative_addr_impl(OFC_VOID *addr)
 {
-  OFC_VOID *rel;
   OFC_ULONG_PTR ptr;
 
   ptr = (OFC_ULONG_PTR) addr;
