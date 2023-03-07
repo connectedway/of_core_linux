@@ -285,4 +285,9 @@ OFC_VOID ofc_net_resolve_dns_name_impl(OFC_LPCSTR name,
     }
 }
 
+OFC_CORE_LIB OFC_VOID
+ofc_net_set_handle_impl(OFC_UINT64 network_handle)
+{
+}
+
 /** \} */
