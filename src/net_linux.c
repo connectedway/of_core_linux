@@ -20,6 +20,13 @@
 #include "ofc/net.h"
 #include "ofc/net_internal.h"
 
+#if defined(OFC_KERBEROS)
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <netdb.h>
+#include <resolv.h>
+#endif
+
 /**
  * \defgroup net_linux Linux Network Implementation
  */
@@ -35,6 +42,56 @@ OFC_VOID ofc_net_register_config_impl(OFC_HANDLE hEvent) {
 
 OFC_VOID ofc_net_unregister_config_impl(OFC_HANDLE hEvent) {
 }
+
+#if defined(OFC_KERBEROS)
+OFC_CHAR *ofc_net_get_dc(OFC_VOID)
+{
+  OFC_CHAR *ret = OFC_NULL;
+  OFC_CCHAR *host = "_kerberos._tcp";
+  struct __res_state res;
+
+  if (res_ninit(&res) == 0)
+    {
+      unsigned char answer[PACKETSZ];
+      int len = res_nsearch(&res, host, C_IN, T_SRV, answer, sizeof(answer));
+
+      if (len >= 0)
+	{
+	  ns_msg handle;
+	  ns_rr rr;
+
+	  ns_initparse(answer, len, &handle);
+
+	  for (int i = 0; i < ns_msg_count(handle, ns_s_an) && ret == OFC_NULL; i++)
+	    {
+	      if (ns_parserr(&handle, ns_s_an, i, &rr) >= 0 &&
+		  ns_rr_type(rr) == T_SRV)
+		{
+		  char dname[MAXCDNAME];
+		  // decompress domain name
+		  if (dn_expand(ns_msg_base(handle),
+				ns_msg_end(handle),
+				ns_rr_rdata(rr) + 3 * NS_INT16SZ,
+				dname,
+				sizeof(dname)) >= 0)
+		    {
+		      ret = ofc_strdup(dname);
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  ofc_log(OFC_LOG_WARN, "Could not resolve search for kerberos");
+	}
+    }
+  else
+    {
+      ofc_log(OFC_LOG_WARN, "Could Not Init Resolver Library for getting Domain DC\n");
+    }
+  return (ret);
+}
+#endif
 
 static OFC_BOOL match_families(struct ifaddrs *ifaddrp) {
   OFC_BOOL ret ;
