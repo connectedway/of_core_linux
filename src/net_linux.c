@@ -44,7 +44,7 @@ OFC_VOID ofc_net_unregister_config_impl(OFC_HANDLE hEvent) {
 }
 
 #if defined(OFC_KERBEROS)
-OFC_CHAR *ofc_net_get_dc(OFC_VOID)
+OFC_VOID ofc_net_get_dcs(OFC_UINT *count, OFC_CHAR ***dc)
 {
   OFC_CHAR *ret = OFC_NULL;
   OFC_CCHAR *host = "_kerberos._tcp";
@@ -54,15 +54,15 @@ OFC_CHAR *ofc_net_get_dc(OFC_VOID)
     {
       unsigned char answer[PACKETSZ];
       int len = res_nsearch(&res, host, C_IN, T_SRV, answer, sizeof(answer));
-
       if (len >= 0)
 	{
 	  ns_msg handle;
 	  ns_rr rr;
 
 	  ns_initparse(answer, len, &handle);
-
-	  for (int i = 0; i < ns_msg_count(handle, ns_s_an) && ret == OFC_NULL; i++)
+          *count = ns_msg_count(handle, ns_s_an);
+          *dc = ofc_malloc(*count * (sizeof(OFC_CHAR *) * *count));
+	  for (int i = 0; i < ns_msg_count(handle, ns_s_an) ; i++)
 	    {
 	      if (ns_parserr(&handle, ns_s_an, i, &rr) >= 0 &&
 		  ns_rr_type(rr) == T_SRV)
@@ -75,7 +75,7 @@ OFC_CHAR *ofc_net_get_dc(OFC_VOID)
 				dname,
 				sizeof(dname)) >= 0)
 		    {
-		      ret = ofc_strdup(dname);
+                      (*dc)[i] = ofc_strdup(dname);
 		    }
 		}
 	    }
@@ -89,7 +89,6 @@ OFC_CHAR *ofc_net_get_dc(OFC_VOID)
     {
       ofc_log(OFC_LOG_WARN, "Could Not Init Resolver Library for getting Domain DC\n");
     }
-  return (ret);
 }
 #endif
 
