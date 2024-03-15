@@ -264,43 +264,45 @@ OFC_VOID *ofc_process_relative_addr_impl(OFC_VOID *addr)
   OFC_ULONG_PTR ptr;
 
   ptr = (OFC_ULONG_PTR) addr;
-  if (core_load_addr == 0 || smb_load_addr == 0)
-    ptr = 0;
-  else if (core_load_addr > smb_load_addr)
+  /*
+   * If it's relative, then load addresses will be non zero
+   */
+  if (core_load_addr != 0 && smb_load_addr != 0)
     {
-      if (ptr > core_load_addr)
-	{
-	  ptr -= core_load_addr;
-	}
-      else if (ptr > smb_load_addr)
-	{
-	  ptr -= smb_load_addr;
-	  /*
-	   * set the top bit so we know it's in smb lib
-	   */
-	  ptr |= 0x8000000000000000LL;
-	}
+      if (core_load_addr > smb_load_addr)
+        {
+          if (ptr > core_load_addr)
+            {
+              ptr -= core_load_addr;
+            }
+          else if (ptr > smb_load_addr)
+            {
+              ptr -= smb_load_addr;
+              /*
+               * set the top bit so we know it's in smb lib
+               */
+              ptr |= 0x8000000000000000LL;
+            }
+          else
+            ptr = 0;
+        }
       else
-	ptr = 0;
+        {
+          if (ptr > smb_load_addr)
+            {
+              ptr -= smb_load_addr;
+              /*
+               * set the top bit so we know it's in smb lib
+               */
+              ptr |= 0x8000000000000000LL;
+            }
+          else if (ptr > core_load_addr)
+            {
+              ptr -= core_load_addr;
+            }
+          else
+            ptr = 0;
+        }
     }
-  else if (smb_load_addr > core_load_addr)
-    {
-      if (ptr > smb_load_addr)
-	{
-	  ptr -= smb_load_addr;
-	  /*
-	   * set the top bit so we know it's in smb lib
-	   */
-	  ptr |= 0x8000000000000000LL;
-	}
-      else if (ptr > core_load_addr)
-	{
-	  ptr -= core_load_addr;
-	}
-      else
-	ptr = 0;
-    }
-  else
-    ptr = 0;
   return ((OFC_VOID *) ptr);
 }

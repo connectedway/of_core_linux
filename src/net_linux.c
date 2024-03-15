@@ -82,7 +82,7 @@ OFC_VOID ofc_net_get_dcs(OFC_UINT *count, OFC_CHAR ***dc)
 	}
       else
 	{
-	  ofc_log(OFC_LOG_WARN, "Could not resolve search for kerberos");
+	  ofc_log(OFC_LOG_WARN, "Could not resolve search for kerberos\n");
 	}
     }
   else
