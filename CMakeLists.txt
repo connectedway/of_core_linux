@@ -20,6 +20,7 @@ set(SRCS
         src/thread_linux.c
         src/time_linux.c
         src/waitset_linux.c
+        src/backtrace_linux.c
         )
 
 add_library(of_core_linux OBJECT ${SRCS})
