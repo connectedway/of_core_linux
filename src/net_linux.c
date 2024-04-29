@@ -44,16 +44,15 @@ OFC_VOID ofc_net_unregister_config_impl(OFC_HANDLE hEvent) {
 }
 
 #if defined(OFC_KERBEROS)
-OFC_VOID ofc_net_get_dcs(OFC_UINT *count, OFC_CHAR ***dc)
+OFC_VOID ofc_net_resolve_svc(OFC_CCHAR *svc, OFC_UINT *count, OFC_CHAR ***dc)
 {
   OFC_CHAR *ret = OFC_NULL;
-  OFC_CCHAR *host = "_kerberos._tcp";
   struct __res_state res;
 
   if (res_ninit(&res) == 0)
     {
       unsigned char answer[PACKETSZ];
-      int len = res_nsearch(&res, host, C_IN, T_SRV, answer, sizeof(answer));
+      int len = res_nsearch(&res, svc, C_IN, T_SRV, answer, sizeof(answer));
       if (len >= 0)
 	{
 	  ns_msg handle;
