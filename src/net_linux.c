@@ -95,22 +95,25 @@ static OFC_BOOL match_families(struct ifaddrs *ifaddrp) {
   OFC_BOOL ret ;
 
   ret = OFC_FALSE ;
+  if (ifaddrp->ifa_addr != OFC_NULL)
+    {
 #if defined(OFC_DISCOVER_IPV4)
-  if (ifaddrp->ifa_addr->sa_family == AF_INET)
-    ret = OFC_TRUE ;
+      if (ifaddrp->ifa_addr->sa_family == AF_INET)
+	ret = OFC_TRUE ;
 #endif
 #if defined(OFC_DISCOVER_IPV6)
-  if (ifaddrp->ifa_addr->sa_family == AF_INET6)
-    {
-      struct sockaddr_in6 *sock6 ;
+      if (ifaddrp->ifa_addr->sa_family == AF_INET6)
+	{
+	  struct sockaddr_in6 *sock6 ;
 
-      sock6 = (struct sockaddr_in6 *) ifaddrp->ifa_addr ;
-      /* ignore the link local address */
-      if (((sock6->sin6_addr.s6_addr[0] & 0xFF) != 0xFE) ||
-	  ((sock6->sin6_addr.s6_addr[1] & 0xC0) != 0x80))
-	ret = OFC_TRUE ;
-    }
+	  sock6 = (struct sockaddr_in6 *) ifaddrp->ifa_addr ;
+	  /* ignore the link local address */
+	  if (((sock6->sin6_addr.s6_addr[0] & 0xFF) != 0xFE) ||
+	      ((sock6->sin6_addr.s6_addr[1] & 0xC0) != 0x80))
+	    ret = OFC_TRUE ;
+	}
 #endif      
+    }
   return (ret) ;
 }
 
