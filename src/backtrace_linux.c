@@ -5,7 +5,7 @@
  */
 
 #include <execinfo.h>
-
+#include <stdlib.h>
 
 #include "ofc/types.h"
 #include "ofc/impl/backtraceimpl.h"
@@ -13,4 +13,17 @@
 OFC_VOID ofc_backtrace_impl(OFC_VOID **trace, OFC_SIZET len)
 {
   backtrace(trace, len);
+}
+
+OFC_VOID ofc_backtrace_sym_impl(OFC_CHAR ***trace, OFC_SIZET len)
+{
+  void *addr_trace[8];
+
+  backtrace(addr_trace, len);
+  *trace = backtrace_symbols(addr_trace, len);
+}
+
+OFC_VOID ofc_backtrace_sym_free_impl(OFC_CHAR **trace)
+{
+  free(trace);
 }
