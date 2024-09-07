@@ -9,6 +9,10 @@ include_directories(
         ${of_core_linux_SOURCE_DIR}/include
 )
 
+if(OFC_FS_PIPE)
+  include_directories(${of_core_fs_pipe_SOURCE_DIR}/include)
+endif()
+
 set(SRCS
         src/console_linux.c
         src/env_linux.c
