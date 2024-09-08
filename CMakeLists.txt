@@ -10,7 +10,7 @@ include_directories(
 )
 
 if(OFC_FS_PIPE)
-  include_directories(${of_core_fs_pipe_SOURCE_DIR}/include)
+  include_directories(${openfiles_SOURCE_DIR}/of_core_fs_pipe/include)
 endif()
 
 set(SRCS
