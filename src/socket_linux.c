@@ -3,6 +3,8 @@
  * Attribution-NoDerivatives 4.0 International license that can be
  * found in the LICENSE file.
  */
+#define HP_ERRORS
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -303,6 +305,21 @@ OFC_BOOL ofc_socket_impl_connect(OFC_HANDLE hSocket,
       if (((status != 0) && (errno == EINPROGRESS)) || (status == 0))
 	ret = OFC_TRUE ;
 
+#if defined(HP_ERRORS)
+      OFC_DWORD_PTR last_error;
+      if (errno == ENETUNREACH)
+        last_error = OFC_ERROR_NETWORK_UNREACHABLE;
+      else if (errno == ECONNREFUSED)
+        last_error = OFC_ERROR_CONNECTION_REFUSED;
+      else if (errno == ETIMEDOUT)
+        last_error = OFC_ERROR_TIMEOUT;
+      else if (errno = EPROTOTYPE)
+        last_error = OFC_ERROR_PROTOCOL_UNREACHABLE;
+      else
+        last_error = OFC_ERROR_BAD_NET_NAME;
+        
+      ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) lasst_error);
+#endif
       ofc_free(mysockaddr) ;
 
       ofc_handle_unlock(hSocket) ;
@@ -718,6 +735,27 @@ OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket)
       if (pSocket->revents & POLLOUT)
 	EventTest |= OFC_SOCKET_EVENT_WRITE ;
 
+#if defined(HP_ERRORS)
+      OFC_DWORD_PTR last_error;
+      if (EventTest & OFC_SOCKET_EVENT_CLOSE)
+        {
+          int so_error;
+          last_error = OFC_ERROR_BAD_NET_NAME;
+          if (getsockopt(pSocket->socket, SOL_SOCKET, SO_ERROR,
+                         (int) &so_error, sizeof(int)) == 0)
+            {
+              if (so_error == ENETUNREACH)
+                last_error = OFC_ERROR_NETWORK_UNREACHABLE;
+              else if (so_error == ECONNREFUSED)
+                last_error = OFC_ERROR_CONNECTION_REFUSED;
+              else if (so_error == ETIMEDOUT)
+                last_error = OFC_ERROR_TIMEOUT;
+              else if (so_error = EPROTOTYPE)
+                last_error = OFC_ERROR_PROTOCOL_UNREACHABLE;
+            }
+          ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) lasst_error);
+        }
+#endif
       ofc_handle_unlock(hSocket) ;
     }
   
