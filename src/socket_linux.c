@@ -18,10 +18,12 @@
 #include <arpa/inet.h>
 
 #include "ofc/types.h"
+#include "ofc/file.h"
 #include "ofc/handle.h"
 #include "ofc/libc.h"
 #include "ofc/socket.h"
 #include "ofc/impl/socketimpl.h"
+#include "ofc/thread.h"
 #include "ofc/net.h"
 #include "ofc/net_internal.h"
 
@@ -318,7 +320,7 @@ OFC_BOOL ofc_socket_impl_connect(OFC_HANDLE hSocket,
       else
         last_error = OFC_ERROR_BAD_NET_NAME;
         
-      ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) lasst_error);
+      ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) last_error);
 #endif
       ofc_free(mysockaddr) ;
 
@@ -740,9 +742,11 @@ OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket)
       if (EventTest & OFC_SOCKET_EVENT_CLOSE)
         {
           int so_error;
+	  socklen_t so_len;
           last_error = OFC_ERROR_BAD_NET_NAME;
+	  so_len = sizeof(int);
           if (getsockopt(pSocket->socket, SOL_SOCKET, SO_ERROR,
-                         (int) &so_error, sizeof(int)) == 0)
+                         (int *) &so_error, &so_len) == 0)
             {
               if (so_error == ENETUNREACH)
                 last_error = OFC_ERROR_NETWORK_UNREACHABLE;
@@ -753,7 +757,7 @@ OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket)
               else if (so_error = EPROTOTYPE)
                 last_error = OFC_ERROR_PROTOCOL_UNREACHABLE;
             }
-          ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) lasst_error);
+          ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) last_error);
         }
 #endif
       ofc_handle_unlock(hSocket) ;
