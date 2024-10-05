@@ -16,10 +16,12 @@
 #include <arpa/inet.h>
 
 #include "ofc/types.h"
+#include "ofc/file.h"
 #include "ofc/handle.h"
 #include "ofc/libc.h"
 #include "ofc/socket.h"
 #include "ofc/impl/socketimpl.h"
+#include "ofc/thread.h"
 #include "ofc/net.h"
 #include "ofc/net_internal.h"
 
@@ -303,6 +305,19 @@ OFC_BOOL ofc_socket_impl_connect(OFC_HANDLE hSocket,
       if (((status != 0) && (errno == EINPROGRESS)) || (status == 0))
 	ret = OFC_TRUE ;
 
+      OFC_DWORD_PTR last_error;
+      if (errno == ENETUNREACH)
+        last_error = OFC_ERROR_NETWORK_UNREACHABLE;
+      else if (errno == ECONNREFUSED)
+        last_error = OFC_ERROR_CONNECTION_REFUSED;
+      else if (errno == ETIMEDOUT)
+        last_error = OFC_ERROR_TIMEOUT;
+      else if (errno = EPROTOTYPE)
+        last_error = OFC_ERROR_PROTOCOL_UNREACHABLE;
+      else
+        last_error = OFC_ERROR_BAD_NET_NAME;
+        
+      ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) last_error);
       ofc_free(mysockaddr) ;
 
       ofc_handle_unlock(hSocket) ;
@@ -718,6 +733,27 @@ OFC_SOCKET_EVENT_TYPE ofc_socket_impl_test(OFC_HANDLE hSocket)
       if (pSocket->revents & POLLOUT)
 	EventTest |= OFC_SOCKET_EVENT_WRITE ;
 
+      OFC_DWORD_PTR last_error;
+      if (EventTest & OFC_SOCKET_EVENT_CLOSE)
+        {
+          int so_error;
+	  socklen_t so_len;
+          last_error = OFC_ERROR_BAD_NET_NAME;
+	  so_len = sizeof(int);
+          if (getsockopt(pSocket->socket, SOL_SOCKET, SO_ERROR,
+                         (int *) &so_error, &so_len) == 0)
+            {
+              if (so_error == ENETUNREACH)
+                last_error = OFC_ERROR_NETWORK_UNREACHABLE;
+              else if (so_error == ECONNREFUSED)
+                last_error = OFC_ERROR_CONNECTION_REFUSED;
+              else if (so_error == ETIMEDOUT)
+                last_error = OFC_ERROR_TIMEOUT;
+              else if (so_error = EPROTOTYPE)
+                last_error = OFC_ERROR_PROTOCOL_UNREACHABLE;
+            }
+          ofc_thread_set_variable(OfcLastError, (OFC_DWORD_PTR) last_error);
+        }
       ofc_handle_unlock(hSocket) ;
     }
   
