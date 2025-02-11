@@ -90,7 +90,7 @@ static void open_log(void)
    * -1.  No logging will occur.
    */
   g_logfile_fd = open (logfile,
-		       O_CREAT | O_WRONLY,
+		       O_CREAT | O_WRONLY | O_TRUNC,
 		       S_IRWXU | S_IRWXG | S_IRWXO) ;
   /*
    * Get rid of temporary buffer
@@ -212,7 +212,7 @@ OFC_VOID ofc_write_log_impl(OFC_LOG_LEVEL level,
    * See if logfile pattern is null and we are writing to syslog
    * or if we were unable to open the log file
    */
-  if (g_logfile_pattern == OFC_NULL && g_logfile_fd != -1)
+  if (g_logfile_pattern == OFC_NULL || g_logfile_fd == -1)
     ofc_write_syslog(level, obuf, len);
   else
     {
@@ -235,11 +235,13 @@ OFC_VOID ofc_write_log_impl(OFC_LOG_LEVEL level,
 	    {
 	      close_log();
 	      g_instance++;
-	      if (g_instance > g_max_instance)
+	      if (g_instance >= g_max_instance)
 		g_instance = 0;
 	      open_log();
 	    }
 	}
+      (void)!write (g_logfile_fd, obuf, len) ;
+      fsync (g_logfile_fd) ;
     }
 }
 
