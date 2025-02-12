@@ -11,6 +11,7 @@
 #include <syslog.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <sys/stat.h>
 
 #include "ofc/types.h"
@@ -240,6 +241,21 @@ OFC_VOID ofc_write_log_impl(OFC_LOG_LEVEL level,
 	      open_log();
 	    }
 	}
+      time_t now;
+      char timebuf[26];
+      /*
+       * Write a time stamp
+       */
+      now = time(NULL);
+      ctime_r(&now, timebuf);
+      /*
+       * rid us of the newline
+       */
+      timebuf[24] = ' ';
+      (void)!write (g_logfile_fd, timebuf, 25) ;
+      /*
+       * Now write the buffer
+       */
       (void)!write (g_logfile_fd, obuf, len) ;
       fsync (g_logfile_fd) ;
     }
