@@ -92,7 +92,7 @@ static void open_log(void)
    */
   g_logfile_fd = open (logfile,
 		       O_CREAT | O_WRONLY | O_TRUNC,
-		       S_IRWXU | S_IRWXG | S_IRWXO) ;
+		       S_IRWU | S_IRWG | S_IRWO) ;
   /*
    * Get rid of temporary buffer
    */
