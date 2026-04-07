@@ -80,7 +80,7 @@ OFC_INT ofc_net_reverse_dns(OFC_IPADDR *ip, OFC_CHAR *fqdn,
       size_t name_len = 0;
       for (int i = 15; i >= 0; i--)
         {
-          name_len += snprintf(NULL, 0, "%x.%x.", ip_bytes[i] & 0x0F, ip_bytes[i] >> 4);
+          name_len += snprintf(NULL, 0, "%1x.%1x.", ip_bytes[i] & 0x0F, ip_bytes[i] >> 4);
         }
       name_len += strlen("ip6.arpa") + 1; 
     
@@ -107,6 +107,7 @@ OFC_INT ofc_net_reverse_dns(OFC_IPADDR *ip, OFC_CHAR *fqdn,
               else
                 ret = -1;
             }
+          remaining = name_len - (p - ptr_name);
           if (remaining > strlen("ip6.arpa"))
             strncpy (p, "ip6.arpa", remaining);
           else
