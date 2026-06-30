@@ -23,8 +23,10 @@
 #if defined(OFC_KERBEROS)
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <errno.h>
 #include <netdb.h>
 #include <resolv.h>
+#include <string.h>
 #endif
 
 /**
@@ -44,6 +46,147 @@ OFC_VOID ofc_net_unregister_config_impl(OFC_HANDLE hEvent) {
 }
 
 #if defined(OFC_KERBEROS)
+#define MAX_FQDN 256
+#define MAX_DNS_PACKET 512
+
+OFC_INT ofc_net_reverse_dns(OFC_IPADDR *ip, OFC_CHAR *fqdn,
+                            OFC_SIZET fqdn_len)
+{
+  OFC_INT ret = 0;
+  char *ptr_name = NULL;
+  if (ip->ip_version == OFC_FAMILY_IP)
+    {
+      unsigned char ip_bytes[4];
+      uint32_t addr = ntohl(ip->u.ipv4.addr);
+      ip_bytes[0] = (addr >> 24) & 0xFF;
+      ip_bytes[1] = (addr >> 16) & 0xFF;
+      ip_bytes[2] = (addr >> 8) & 0xFF;
+      ip_bytes[3] = addr & 0xFF;
+      ptr_name = ofc_saprintf("%u.%u.%u.%u.in-addr.arpa",
+                              ip_bytes[0], ip_bytes[1], ip_bytes[2], ip_bytes[3]);
+      if (ptr_name == NULL)
+        {
+          ofc_log(OFC_LOG_INFO, "Failed to allocate memory for IPv4 PTR name\n");
+          ret = -1;
+        }
+    }
+  else if (ip->ip_version == OFC_FAMILY_IPV6)
+    {
+      unsigned char ip_bytes[16];
+      memcpy(ip_bytes, (OFC_CHAR*)&ip->u.ipv6._s6_addr, 16);
+      /*
+       * Calculated name of resulting string
+       */
+      size_t name_len = 0;
+      for (int i = 15; i >= 0; i--)
+        {
+          name_len += snprintf(NULL, 0, "%1x.%1x.", ip_bytes[i] & 0x0F, ip_bytes[i] >> 4);
+        }
+      name_len += strlen("ip6.arpa") + 1; 
+    
+      ptr_name = (char *)ofc_malloc(name_len);
+      if (ptr_name == NULL)
+        {
+          ofc_log(OFC_LOG_INFO, "Failed to allocate memory for IPv6 PTR name\n");
+          ret = -1;
+        }
+      else
+        {
+          char *p = ptr_name;
+          size_t remaining = 0;
+          for (int i = 15; i >= 0 && ret == 0; i--)
+            {
+              remaining = name_len - (p - ptr_name);
+              /* 
+               * make sure the nibbles will fit (and leave one character for EOS) 
+               */
+              if (remaining > 4)
+                {
+                  p += snprintf(p, remaining, "%1x.%1x.", ip_bytes[i] & 0x0F, ip_bytes[i] >> 4);
+                }
+              else
+                ret = -1;
+            }
+          remaining = name_len - (p - ptr_name);
+          if (remaining > strlen("ip6.arpa"))
+            strncpy (p, "ip6.arpa", remaining);
+          else
+            ret = -1;
+        }
+    }
+  else
+    {
+      ofc_log (OFC_LOG_INFO, "Unsupported address family\n");
+      return -1;
+    }
+
+  if (ret == 0 && ptr_name != NULL)
+    {
+      res_init();
+
+      unsigned char answer[MAX_DNS_PACKET];
+      int len = res_query(ptr_name, C_IN, T_PTR, answer, sizeof(answer));
+      if (len < 0)
+        {
+          ofc_log (OFC_LOG_INFO, "DNS Query failed: %s\n",
+                   hstrerror(h_errno));
+          ret = -1;
+        }
+      else
+        {
+          ns_msg handle;
+          if (ns_initparse(answer, len, &handle) < 0)
+            {
+              ofc_log (OFC_LOG_INFO,
+                       "Failed to parse DNS response: %s\n",
+                       strerror(errno));
+              ret = -1;
+            }
+          else
+            {
+              ns_rr rr;
+              for (int i = 0; i < ns_msg_count(handle, ns_s_an) && ret == 0; i++)
+                {
+                  if (ns_parserr(&handle, ns_s_an, i, &rr) == 0 &&
+                      ns_rr_type(rr) == T_PTR)
+                    {
+                      const char *data = ns_rr_rdata(rr);
+                      char hostname[MAX_FQDN];
+                      if (dn_expand(answer, answer + len, data,
+                                    hostname, sizeof(hostname)) < 0)
+                        {
+                          ofc_log (OFC_LOG_INFO,
+                                   "Failed to expand hostname: %s\n",
+                                   strerror(errno));
+                          ret = -1;
+                        }
+                      else
+                        {
+                          if (strnlen(hostname, sizeof(hostname)) > fqdn_len)
+                            {
+                              ofc_log(OFC_LOG_INFO,
+                                      "fqdn buffer insufficient to hold reverse lookup");
+                              ret = -1;
+                            }
+                          else
+                            {
+                              strncpy(fqdn, hostname, fqdn_len);
+                            }
+                        }
+                    }
+                  else
+                    {
+                      ofc_log (OFC_LOG_INFO, "No PTR record found for IP\n");
+                      ret = -1;
+                    }
+                }
+            }
+        }
+      ofc_free(ptr_name);
+    }
+  return (ret);
+}
+
 OFC_VOID ofc_net_resolve_svc(OFC_CCHAR *svc, OFC_UINT *count, OFC_CHAR ***dc)
 {
   OFC_CHAR *ret = OFC_NULL;
