@@ -10,6 +10,7 @@
 #include <net/route.h>
 #include <poll.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -117,8 +118,47 @@ OFC_HANDLE ofc_socket_impl_create(OFC_FAMILY_TYPE family,
 	  if (socktype == SOCKET_TYPE_DGRAM)
 	    {
 	      on = OFC_TRUE ;
-	      setsockopt (sock->socket, SOL_SOCKET, SO_BROADCAST, 
+	      setsockopt (sock->socket, SOL_SOCKET, SO_BROADCAST,
 			  (char *) &on, sizeof(on)) ;
+	    }
+	  else if (socktype == SOCKET_TYPE_STREAM)
+	    {
+	      /*
+	       * Keepalives + TCP_USER_TIMEOUT together guarantee that
+	       * a stuck TCP connection fails within ~30 seconds rather
+	       * than blocking indefinitely on the default Linux TCP
+	       * timeouts (which can be hours).  Without this, a stalled
+	       * SMB send/recv on a vanished peer pins the calling thread
+	       * inside the kernel for the tcp_retries2 budget (~15 min
+	       * with kernel defaults), long past any application-level
+	       * request timeout the SMB layer can enforce.
+	       *
+	       * SO_KEEPALIVE + TCP_KEEPIDLE/INTVL/CNT: actively probe an
+	       * idle connection for liveness.  First probe after 10s of
+	       * idle, 5s between probes, 3 probes total -> connection
+	       * fails at 10 + 3*5 = 25s if the peer is unreachable.
+	       *
+	       * TCP_USER_TIMEOUT: kernel-level abandonment timer.  If no
+	       * data ACK is received within 30s, RST the connection.
+	       * Backstop in case the keepalive probes themselves are
+	       * dropped silently somewhere on the path.
+	       */
+	      int keepalive_on = 1;
+	      setsockopt(sock->socket, SOL_SOCKET, SO_KEEPALIVE,
+			 &keepalive_on, sizeof(keepalive_on));
+	      int keepalive_idle = 10;     /* seconds idle before first probe */
+	      setsockopt(sock->socket, IPPROTO_TCP, TCP_KEEPIDLE,
+			 &keepalive_idle, sizeof(keepalive_idle));
+	      int keepalive_intvl = 5;     /* seconds between probes */
+	      setsockopt(sock->socket, IPPROTO_TCP, TCP_KEEPINTVL,
+			 &keepalive_intvl, sizeof(keepalive_intvl));
+	      int keepalive_cnt = 3;       /* probes before giving up */
+	      setsockopt(sock->socket, IPPROTO_TCP, TCP_KEEPCNT,
+			 &keepalive_cnt, sizeof(keepalive_cnt));
+
+	      unsigned int user_timeout_ms = 30000;  /* 30 seconds */
+	      setsockopt(sock->socket, IPPROTO_TCP, TCP_USER_TIMEOUT,
+			 &user_timeout_ms, sizeof(user_timeout_ms));
 	    }
 	  hSocket = ofc_handle_create(OFC_HANDLE_SOCKET_IMPL, sock) ;
 	}
