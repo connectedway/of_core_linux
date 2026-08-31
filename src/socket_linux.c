@@ -250,8 +250,18 @@ OFC_VOID unmake_sockaddr(struct sockaddr *mysockaddr,
 	{
 	  ip->ip_version = OFC_FAMILY_IPV6 ;
 	  for (i = 0 ; i < 16 ; i++)
-	    ip->u.ipv6._s6_addr[i] = 
-	      mysockaddr_in6->sin6_addr.s6_addr[i] ; 
+	    ip->u.ipv6._s6_addr[i] =
+	      mysockaddr_in6->sin6_addr.s6_addr[i] ;
+	  /* Copy scope id back too. Symmetric with make_sockaddr above.
+	   * Critical for link-local addresses (fe80::/10) — without the
+	   * scope id, a subsequent connect() to a link-local peer fails
+	   * because the kernel doesn't know which interface to send on.
+	   * The bug wasn't caught earlier because the old
+	   * ofc_socket_source_address() read scope from getifaddrs()
+	   * directly, not via a socket round-trip. The scratch-UDP
+	   * source-selection introduced with the HP multi-interface fix
+	   * exposed this by routing scope through getsockname(). */
+	  ip->u.ipv6.scope = mysockaddr_in6->sin6_scope_id ;
 	}
       if (port != OFC_NULL)
 	*port = OFC_NET_NTOS (&mysockaddr_in6->sin6_port, 0) ;
